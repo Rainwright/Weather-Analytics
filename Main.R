@@ -16,7 +16,7 @@ loadData = function() {
   # data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Program/weatherdata.csv", header=TRUE, sep=",")
   data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
   options(max.print=1000000)
-  print(colnames(data))
+  # print(colnames(data))
   return (data)
 }
 
@@ -26,7 +26,7 @@ farenheitToCelcius = function(farenheit){
 }
 
 # Analysis 1
-analysis1 = function() {
+analysis1 = function(data) {
   temp_temperature = 0
   temperature_counter = 0
   origin_column = c()
@@ -58,43 +58,79 @@ analysis1 = function() {
   plot = ggplot(average_daily_temp, aes(Date, AverageTemperature, color=Origin)) + geom_point()
   print(plot)
   
-  print(average_daily_temp[which.min(average_daily_temp$AverageTemperature),])
-  print(average_daily_temp[which.max(average_daily_temp$AverageTemperature),])
-  print(average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.min(average_daily_temp$AverageTemperature),])
-  print(average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.max(average_daily_temp$AverageTemperature),])
-  print(average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.min(average_daily_temp$AverageTemperature),])
-  print(average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.max(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[which.min(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[which.max(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.min(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.max(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.min(average_daily_temp$AverageTemperature),])
+  # print(average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.max(average_daily_temp$AverageTemperature),])
+  
+  # return (plot);
+  return(list(plot,
+              average_daily_temp[which.min(average_daily_temp$AverageTemperature),],
+              average_daily_temp[which.max(average_daily_temp$AverageTemperature),],
+              average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.min(average_daily_temp$AverageTemperature),],
+              average_daily_temp[(average_daily_temp$Origin == "JFK"),][which.max(average_daily_temp$AverageTemperature),],
+              average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.min(average_daily_temp$AverageTemperature),],
+              average_daily_temp[(average_daily_temp$Origin == "LGA"),][which.max(average_daily_temp$AverageTemperature),]
+              ))
 }
 
 # Analysis2
-analysis2 = function() {
-  # something about visibilty
-  plot = ggplot(data, aes(new_time_hour, visib, color=origin)) + 
-    geom_histogram() + 
-    scale_x_datetime(limits=as.POSIXct(c("2013-01-01 01:00:00","2013-01-01 23:00:00")))
-  print(plot)
+analysis2 = function(data, origin) {
+  data = switch(origin, 
+                "1"=data[data$origin == "JFK",], 
+                "2"=data[data$origin == "LGA",], 
+                data)
+
+  plot = ggplot(na.omit(data), aes(wind_speed, wind_gust, color=origin)) + 
+    geom_jitter() + 
+    geom_smooth(method='lm')
+  
+  return (plot)
 }
 
-data = loadData()
+main = function() {
+  data = loadData()
+  
+  # change old time to proper date time format
+  data$new_time = as.Date(strptime(data$time_hour, "%d/%m/%Y %H:%M"))
+  data$new_time_hour = as.POSIXct(strptime(data$time_hour, "%d/%m/%Y %H:%M"))
+  # View(data)
+  # max(data$wind_speed, na.rm = TRUE)
+  # max(data$wind_gust, na.rm = TRUE)
+  # max(data$wind_dir, na.rm = TRUE)
 
-# change old time to proper date time format
-data$new_time = as.Date(strptime(data$time_hour, "%d/%m/%Y %H:%M"))
-data$new_time_hour = as.POSIXct(strptime(data$time_hour, "%d/%m/%Y %H:%M"))
-View(data)
-analysis1()
-analysis2()
+  # set up server and ui
+  ui <- fluidPage(
+    navlistPanel(
+      tabPanel(title = "Analysis 1",
+               plotOutput("diagram1"),
+               tags$div(id="txt", analysis1(data)[2])
+      ),
+      tabPanel(title = "Analysis 2",
+               plotOutput("diagram2"),
+               selectInput("origin", h3("Select Origin"),
+                           choices = list("JFK" = 1,
+                                          "LGA" = 2,
+                                          "JFK and LGA" = 3),
+                           selected = 1)
+      )
+    )
+  )
 
-# set up server and ui
-# ui <- fluidPage(
-#   h1("My Shiny App"),
-#   p(style = "font-family:Impact",
-#     "See other apps in the",
-#     a("Shiny Showcase",
-#       href = "http://www.rstudio.com/
-#       products/shiny/shiny-user-showcase/")
-#   )
-# )
-# 
-# server <- function(input, output){}
-# 
-# shinyApp(ui = ui, server = server)
+  server <- function(input, output){
+    output$diagram1 <- renderPlot({
+      analysis1(data)[1]
+    })
+    
+    output$diagram2 <- renderPlot({
+      analysis2(data,input$origin)
+    })
+  }
+
+  shinyApp(ui = ui, server = server)
+}
+
+main()
+
