@@ -48,7 +48,9 @@ Humidity
 
 * Analysis 6.1 - How to predict frosting using dewpoint and humidity
 
-Note: 1. Produce all mean, median, standard deviation
-      2. Relate with airplane
+Note: 
+1. Produce all mean, median, standard deviation
+      
+2. Relate with airplane
 
 
