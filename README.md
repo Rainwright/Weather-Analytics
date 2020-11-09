@@ -44,7 +44,7 @@ Dewpoint
 * [ ] Analysis 5.1 - Does temperature and dewpoint affects precipitation
 
 Humidity
-* [ ] Analysis 6 - What is the mean, median, standard deviation, min and max dewpoint at both airports for each season
+* [ ] Analysis 6 - What is the mean, median, standard deviation, min and max humidity at both airports for each season
 
 * [ ] Analysis 6.1 - How to predict frosting using dewpoint and humidity
 
