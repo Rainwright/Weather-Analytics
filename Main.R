@@ -290,72 +290,224 @@ analysis3 = function(data, season, origin) {
   ))
 }
 
-# Analysis 5
-analysis5 = function(data, quartile, origin) {
-  # plot = ggplot(na.omit(data[data$visib < 10,]), aes(x =visib, group=origin, fill=origin)) +
-  #   geom_histogram() +
-  #   scale_x_continuous(breaks = round(seq(min(data$visib), max(data$visib), by = 0.5),1))
+analysis4 = function(data, season, origin) {
+  data = filterSeason(data, season)
   
-  min_visib = 10
-  visib_counter = 0
-  origin_column = c()
-  date_column = c()
-  min_visib_column = c()
+  original_data = data
   
-  for(i in 1:nrow(data)) {
-    if(i == 1) {
-      currentDate = data$new_time[i]
-    } else {
-      if(data$new_time[i] == currentDate) {
-        if(data$visib[i] < min_visib) {
-          min_visib = data$visib[i]
-        }
-      } else {
-        origin_column = append(origin_column, data$origin[i - 1])
-        date_column = append(date_column, currentDate)
-        min_visib_column = append(min_visib_column, min_visib)
-        # reset variables
-        min_visib = 10
-        visib_counter = 0
-        # change time to next day
-        currentDate = data$new_time[i]
-      }
-    }
-  }
+  data = filterOrigin(data, origin)
   
-  min_daily_visib = data.frame("Origin"=origin_column, "Date"=date_column, "MinVisib"=min_visib_column)
+  average_daily_visib = calculateAverageAgainstTime(data, data$visib)
   
-  min_daily_visib = switch(quartile,
-                          "1"=min_daily_visib[(min_daily_visib['Date'] >= "2013-01-01") & (min_daily_visib['Date'] <= "2013-04-01"),],
-                          "2"=min_daily_visib[(min_daily_visib['Date'] >= "2013-04-01") & (min_daily_visib['Date'] <= "2013-07-01"),],
-                          "3"=min_daily_visib[(min_daily_visib['Date'] >= "2013-07-01") & (min_daily_visib['Date'] <= "2013-10-01"),],
-                          "4"=min_daily_visib[(min_daily_visib['Date'] >= "2013-10-01") & (min_daily_visib['Date'] <= "2013-12-30"),],
-                          min_daily_visib)
+  plot1 = ggplot(average_daily_visib, aes(Date, AverageValue, color=Origin)) + 
+    geom_point() + 
+    geom_line()
   
-  min_daily_visib = switch(origin, 
-                "1"=min_daily_visib[min_daily_visib$Origin == "JFK",], 
-                "2"=min_daily_visib[min_daily_visib$Origin == "LGA",], 
-                min_daily_visib)
+  # mean_precip = mean(data$precip)
+  # median_precip = median(data$precip)
+  # sd_precip = sd(data$precip)
   
-  plot = ggplot(min_daily_visib[min_daily_visib$MinVisib < 10,], aes(Date, MinVisib, color=Origin)) +
-    geom_jitter() +
-    geom_line() +
-    scale_y_continuous(breaks = round(seq(min(min_daily_visib$MinVisib), max(min_daily_visib$MinVisib), by = 0.5),1))
-  return (plot)
-}
- 
-# Analysis 6
-analysis6 = function(data) {
-  # plot = ggplot(na.omit(data[(data$wind_dir >= 45) & (data$wind_dir <= 135),]), aes(x = new_time, group=origin, fill=origin)) + 
-  #   geom_histogram() + 
-  #   # scale_x_date(breaks="month", labels=date_format("%b"))
-  #   scale_x_date(breaks = breaks_pretty(10))
-  plot = ggplot(na.omit(data[(data$wind_dir > 0) & (data$wind_dir < 180),]), aes(x = new_time, group=origin, fill=origin)) + 
+  mean_visib = mean(data$visib[data$visib < 10])
+  median_visib = median(data$visib[data$visib < 10])
+  sd_visib = sd(data$visib[data$visib < 10])
+  
+  plot1.1 = ggplot(data[data$visib < 10,], aes(x = visib, fill=origin)) + 
     geom_histogram() + 
-    # scale_x_date(breaks="month", labels=date_format("%b"))
-    scale_x_date(breaks = breaks_pretty(10))
-  return (plot)
+    geom_vline(aes(xintercept = mean_visib), colour="red") +
+    geom_vline(aes(xintercept = median_visib), colour="blue", linetype="dashed") + 
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+  
+  print(plot1)
+  return (list(plot1,
+               plot1.1,
+               # mean value
+               round(mean_visib, 2),
+               # median value
+               round(median_visib, 2),
+               # sd value
+               round(sd_visib, 2),
+               # overall min value and date
+               min(average_daily_visib$AverageValue),
+               # overall max value and date
+               max(average_daily_visib$AverageValue),
+               # jfk min value and date
+               round(min(original_data$visib[original_data$origin == "JFK"]), 2),
+               # jfk max value and date
+               round(max(original_data$visib[original_data$origin == "JFK"]), 2),
+               # lga min value and date
+               round(min(original_data$visib[original_data$origin == "LGA"]), 2),
+               # lga max value and date
+               round(max(original_data$visib[original_data$origin == "LGA"]), 2)
+  ))
 }
+
+# Analysis 5
+analysis5 = function(data, season, origin) {
+  data = filterSeason(data, season)
+  
+  original_data = data
+  
+  data = filterOrigin(data, origin)
+  
+  average_daily_dewp = calculateAverageAgainstTime(data, data$dewp)
+  average_daily_dewp$AverageValue = farenheitToCelcius(average_daily_dewp$AverageValue)
+
+  plot1 = ggplot(average_daily_dewp, aes(Date, AverageValue, color=Origin)) + 
+    geom_point() + 
+    geom_line()
+  
+  data$dewp = farenheitToCelcius(data$dewp)
+  mean_dewp = mean(data$dewp)
+  median_dewp = median(data$dewp)
+  sd_dewp = sd(data$dewp)
+
+  plot1.1 = ggplot(data, aes(x = dewp, fill=origin)) + 
+    geom_histogram() + 
+    geom_vline(aes(xintercept = mean_dewp), colour="red") +
+    geom_vline(aes(xintercept = median_dewp), colour="blue", linetype="dashed") + 
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+  
+  print(plot1)
+  return (list(plot1,
+               plot1.1,
+               # mean value
+               round(mean_dewp, 2),
+               # median value
+               round(median_dewp, 2),
+               # sd value
+               round(sd_dewp, 2),
+               # overall min value and date
+               min(average_daily_dewp$AverageValue),
+               # overall max value and date
+               max(average_daily_dewp$AverageValue),
+               # jfk min value and date
+               farenheitToCelcius(min(original_data$dewp[original_data$origin == "JFK"])),
+               # jfk max value and date
+               farenheitToCelcius(max(original_data$dewp[original_data$origin == "JFK"])),
+               # lga min value and date
+               farenheitToCelcius(min(original_data$dewp[original_data$origin == "LGA"])),
+               # lga max value and date
+               farenheitToCelcius(max(original_data$dewp[original_data$origin == "LGA"]))
+  ))
+}
+
+# Analysis 6
+analysis6 = function(data, season, origin) {
+  data = filterSeason(data, season)
+  
+  original_data = data
+  
+  data = filterOrigin(data, origin)
+  
+  average_daily_humid = calculateAverageAgainstTime(data, data$humid)
+  
+  # plot1 = ggplot(data, aes(new_time, humid, color=origin)) + 
+  #   geom_point() + 
+  #   geom_line()
+  
+  plot1 = ggplot(average_daily_humid, aes(Date, AverageValue, color=Origin)) +
+    geom_point() +
+    geom_line()
+  
+  mean_humid = mean(data$humid)
+  median_humid = median(data$humid)
+  sd_humid = sd(data$humid)
+  
+  plot1.1 = ggplot(data, aes(x = humid, fill=origin)) + 
+    geom_histogram() + 
+    geom_vline(aes(xintercept = mean_humid), colour="red") +
+    geom_vline(aes(xintercept = median_humid), colour="blue", linetype="dashed") + 
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+  
+  print(plot1)
+  return (list(plot1,
+               plot1.1,
+               # mean value
+               round(mean_humid, 2),
+               # median value
+               round(median_humid, 2),
+               # sd value
+               round(sd_humid, 2),
+               # overall min value and date
+               min(average_daily_humid$AverageValue),
+               # overall max value and date
+               max(average_daily_humid$AverageValue),
+               # jfk min value and date
+               round(min(original_data$humid[original_data$origin == "JFK"]), 2),
+               # jfk max value and date
+               round(max(original_data$humid[original_data$origin == "JFK"]), 2),
+               # lga min value and date
+               round(min(original_data$humid[original_data$origin == "LGA"]), 2),
+               # lga max value and date
+               round(max(original_data$humid[original_data$origin == "LGA"]), 2)
+  ))
+}
+
+# analysis5 = function(data, quartile, origin) {
+#   # plot = ggplot(na.omit(data[data$visib < 10,]), aes(x =visib, group=origin, fill=origin)) +
+#   #   geom_histogram() +
+#   #   scale_x_continuous(breaks = round(seq(min(data$visib), max(data$visib), by = 0.5),1))
+#   
+#   min_visib = 10
+#   visib_counter = 0
+#   origin_column = c()
+#   date_column = c()
+#   min_visib_column = c()
+#   
+#   for(i in 1:nrow(data)) {
+#     if(i == 1) {
+#       currentDate = data$new_time[i]
+#     } else {
+#       if(data$new_time[i] == currentDate) {
+#         if(data$visib[i] < min_visib) {
+#           min_visib = data$visib[i]
+#         }
+#       } else {
+#         origin_column = append(origin_column, data$origin[i - 1])
+#         date_column = append(date_column, currentDate)
+#         min_visib_column = append(min_visib_column, min_visib)
+#         # reset variables
+#         min_visib = 10
+#         visib_counter = 0
+#         # change time to next day
+#         currentDate = data$new_time[i]
+#       }
+#     }
+#   }
+#   
+#   min_daily_visib = data.frame("Origin"=origin_column, "Date"=date_column, "MinVisib"=min_visib_column)
+#   
+#   min_daily_visib = switch(quartile,
+#                           "1"=min_daily_visib[(min_daily_visib['Date'] >= "2013-01-01") & (min_daily_visib['Date'] <= "2013-04-01"),],
+#                           "2"=min_daily_visib[(min_daily_visib['Date'] >= "2013-04-01") & (min_daily_visib['Date'] <= "2013-07-01"),],
+#                           "3"=min_daily_visib[(min_daily_visib['Date'] >= "2013-07-01") & (min_daily_visib['Date'] <= "2013-10-01"),],
+#                           "4"=min_daily_visib[(min_daily_visib['Date'] >= "2013-10-01") & (min_daily_visib['Date'] <= "2013-12-30"),],
+#                           min_daily_visib)
+#   
+#   min_daily_visib = switch(origin, 
+#                 "1"=min_daily_visib[min_daily_visib$Origin == "JFK",], 
+#                 "2"=min_daily_visib[min_daily_visib$Origin == "LGA",], 
+#                 min_daily_visib)
+#   
+#   plot = ggplot(min_daily_visib[min_daily_visib$MinVisib < 10,], aes(Date, MinVisib, color=Origin)) +
+#     geom_jitter() +
+#     geom_line() +
+#     scale_y_continuous(breaks = round(seq(min(min_daily_visib$MinVisib), max(min_daily_visib$MinVisib), by = 0.5),1))
+#   return (plot)
+# }
+#  
+# Analysis 6
+# analysis6 = function(data) {
+#   # plot = ggplot(na.omit(data[(data$wind_dir >= 45) & (data$wind_dir <= 135),]), aes(x = new_time, group=origin, fill=origin)) + 
+#   #   geom_histogram() + 
+#   #   # scale_x_date(breaks="month", labels=date_format("%b"))
+#   #   scale_x_date(breaks = breaks_pretty(10))
+#   plot = ggplot(na.omit(data[(data$wind_dir > 0) & (data$wind_dir < 180),]), aes(x = new_time, group=origin, fill=origin)) + 
+#     geom_histogram() + 
+#     # scale_x_date(breaks="month", labels=date_format("%b"))
+#     scale_x_date(breaks = breaks_pretty(10))
+#   return (plot)
+# }
 
 main = function() {
   data = loadData()
@@ -604,9 +756,10 @@ main = function() {
                ),
                h3("Average Precipitation against Time (inches)"),
                plotOutput("diagram3"),
-
+               
                h3("Mean and Median of Precipitation (inches)"),
-
+               h4("Removed 0 values as it is majority"),
+               
                fluidRow(
                  column(4,
                         h5(textOutput("text3_3"))
@@ -650,7 +803,213 @@ main = function() {
                         h5(textOutput("text3_11"))
                  ),
                ),
+      ),
+      tabPanel(title = "Analysis 4",
+               fluidRow(
+                 column(4,
+                        selectInput("season_4", h3("Select Season"),
+                                    choices = list("Overall" = 1,
+                                                   "Spring" = 2,
+                                                   "Summer" = 3,
+                                                   "Autumn" = 4,
+                                                   "Winter" = 5),
+                                    selected = 1)
+                 ),
+                 column(4,
+                        selectInput("origin_4", h3("Select Origin"),
+                                    choices = list("JFK and LGA" = 1,
+                                                   "JFK" = 2,
+                                                   "LGA" = 3),
+                                    selected = 1)
+                 )
+               ),
+               h3("Average Visibility against Time (miles)"),
+               plotOutput("diagram4"),
+
+               h3("Mean and Median of Visibility (miles)"),
+               h4("Removed 10 values as it is majority"),
+
+               fluidRow(
+                 column(4,
+                        h5(textOutput("text4_3"))
+                 ),
+                 column(4,
+                        h5(textOutput("text4_4"))
+                 ),
+                 column(4,
+                        h5(textOutput("text4_5"))
+                 ),
+               ),
+               
+               plotOutput("diagram4_1"),
+               
+               h4("Overall Visibility:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text4_6"))
+                 ),
+                 column(3,
+                        h5(textOutput("text4_7"))
+                 ),
+               ),
+               
+               h4("JFK Visibility:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text4_8"))
+                 ),
+                 column(3,
+                        h5(textOutput("text4_9"))
+                 ),
+               ),
+               
+               h4("LGA Visibility:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text4_10"))
+                 ),
+                 column(3,
+                        h5(textOutput("text4_11"))
+                 ),
+               ),
+      ),
+      tabPanel(title = "Analysis 5",
+               fluidRow(
+                 column(4,
+                        selectInput("season_5", h3("Select Season"),
+                                    choices = list("Overall" = 1,
+                                                   "Spring" = 2,
+                                                   "Summer" = 3,
+                                                   "Autumn" = 4,
+                                                   "Winter" = 5),
+                                    selected = 1)
+                 ),
+                 column(4,
+                        selectInput("origin_5", h3("Select Origin"),
+                                    choices = list("JFK and LGA" = 1,
+                                                   "JFK" = 2,
+                                                   "LGA" = 3),
+                                    selected = 1)
+                 )
+               ),
+               h3("Average Dewpoint against Time (\u00B0C)"),
+               plotOutput("diagram5"),
+               
+               h3("Mean and Median of Dewpoint (\u00B0C)"),
+               
+               fluidRow(
+                 column(4,
+                        h5(textOutput("text5_3"))
+                 ),
+                 column(4,
+                        h5(textOutput("text5_4"))
+                 ),
+                 column(4,
+                        h5(textOutput("text5_5"))
+                 ),
+               ),
+               
+               plotOutput("diagram5_1"),
+               
+               h4("Overall Dewpoint:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text5_6"))
+                 ),
+                 column(3,
+                        h5(textOutput("text5_7"))
+                 ),
+               ),
+               
+               h4("JFK Dewpoint:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text5_8"))
+                 ),
+                 column(3,
+                        h5(textOutput("text5_9"))
+                 ),
+               ),
+               
+               h4("LGA Dewpoint:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text5_10"))
+                 ),
+                 column(3,
+                        h5(textOutput("text5_11"))
+                 ),
+               ),
+      ),
+      tabPanel(title = "Analysis 6",
+               fluidRow(
+                 column(4,
+                        selectInput("season_6", h3("Select Season"),
+                                    choices = list("Overall" = 1,
+                                                   "Spring" = 2,
+                                                   "Summer" = 3,
+                                                   "Autumn" = 4,
+                                                   "Winter" = 5),
+                                    selected = 1)
+                 ),
+                 column(4,
+                        selectInput("origin_6", h3("Select Origin"),
+                                    choices = list("JFK and LGA" = 1,
+                                                   "JFK" = 2,
+                                                   "LGA" = 3),
+                                    selected = 1)
+                 )
+               ),
+               h3("Relative Humidity against Time"),
+               plotOutput("diagram6"),
+               
+               h3("Mean and Median of Dewpoint"),
+               
+               fluidRow(
+                 column(4,
+                        h5(textOutput("text6_3"))
+                 ),
+                 column(4,
+                        h5(textOutput("text6_4"))
+                 ),
+                 column(4,
+                        h5(textOutput("text6_5"))
+                 ),
+               ),
+               
+               plotOutput("diagram6_1"),
+               
+               h4("Overall Relative Humidity:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text6_6"))
+                 ),
+                 column(3,
+                        h5(textOutput("text6_7"))
+                 ),
+               ),
+               
+               h4("JFK Relative Humidity:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text6_8"))
+                 ),
+                 column(3,
+                        h5(textOutput("text6_9"))
+                 ),
+               ),
+               
+               h4("LGA Relative Humidity:"),
+               fluidRow(
+                 column(3,
+                        h5(textOutput("text6_10"))
+                 ),
+                 column(3,
+                        h5(textOutput("text6_11"))
+                 ),
+               ),
       )
+      
       # tabPanel(title = "Analysis 3",
       #          plotOutput("diagram3"),
       # ),
@@ -871,6 +1230,141 @@ main = function() {
       })
       
       output$text3_11 <- renderText({
+        paste("Max :", current_analysis[11])
+      })
+    })
+    
+    output$diagram4 <- renderPlot({
+      current_analysis = analysis4(data, input$season_4, input$origin_4)
+      current_analysis[1]
+      
+      output$diagram4_1 <- renderPlot({
+        current_analysis[2]
+      })
+      
+      output$text4_3 <- renderText({
+        paste("Mean :", current_analysis[3])
+      })
+      
+      output$text4_4 <- renderText({
+        paste("Median :", current_analysis[4])
+      })
+      
+      output$text4_5 <- renderText({
+        paste("Standard Deviation :", current_analysis[5])
+      })
+      
+      output$text4_6 <- renderText({
+        paste("Min :", current_analysis[6])
+      })
+      
+      output$text4_7 <- renderText({
+        paste("Max :", current_analysis[7])
+      })
+      
+      output$text4_8 <- renderText({
+        paste("Min :", current_analysis[8])
+      })
+      
+      output$text4_9 <- renderText({
+        paste("Max :", current_analysis[9])
+      })
+      
+      output$text4_10 <- renderText({
+        paste("Min :", current_analysis[10])
+      })
+      
+      output$text4_11 <- renderText({
+        paste("Max :", current_analysis[11])
+      })
+    })
+    
+    output$diagram5 <- renderPlot({
+      current_analysis = analysis5(data, input$season_5, input$origin_5)
+      current_analysis[1]
+      
+      output$diagram5_1 <- renderPlot({
+        current_analysis[2]
+      })
+      
+      output$text5_3 <- renderText({
+        paste("Mean :", current_analysis[3])
+      })
+      
+      output$text5_4 <- renderText({
+        paste("Median :", current_analysis[4])
+      })
+      
+      output$text5_5 <- renderText({
+        paste("Standard Deviation :", current_analysis[5])
+      })
+      
+      output$text5_6 <- renderText({
+        paste("Min :", current_analysis[6])
+      })
+      
+      output$text5_7 <- renderText({
+        paste("Max :", current_analysis[7])
+      })
+      
+      output$text5_8 <- renderText({
+        paste("Min :", current_analysis[8])
+      })
+      
+      output$text5_9 <- renderText({
+        paste("Max :", current_analysis[9])
+      })
+      
+      output$text5_10 <- renderText({
+        paste("Min :", current_analysis[10])
+      })
+      
+      output$text5_11 <- renderText({
+        paste("Max :", current_analysis[11])
+      })
+    })
+    
+    output$diagram6 <- renderPlot({
+      current_analysis = analysis6(data, input$season_6, input$origin_6)
+      current_analysis[1]
+      
+      output$diagram6_1 <- renderPlot({
+        current_analysis[2]
+      })
+      
+      output$text6_3 <- renderText({
+        paste("Mean :", current_analysis[3])
+      })
+      
+      output$text6_4 <- renderText({
+        paste("Median :", current_analysis[4])
+      })
+      
+      output$text6_5 <- renderText({
+        paste("Standard Deviation :", current_analysis[5])
+      })
+      
+      output$text6_6 <- renderText({
+        paste("Min :", current_analysis[6])
+      })
+      
+      output$text6_7 <- renderText({
+        paste("Max :", current_analysis[7])
+      })
+      
+      output$text6_8 <- renderText({
+        paste("Min :", current_analysis[8])
+      })
+      
+      output$text6_9 <- renderText({
+        paste("Max :", current_analysis[9])
+      })
+      
+      output$text6_10 <- renderText({
+        paste("Min :", current_analysis[10])
+      })
+      
+      output$text6_11 <- renderText({
         paste("Max :", current_analysis[11])
       })
     })
