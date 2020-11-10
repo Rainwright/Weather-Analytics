@@ -6,11 +6,13 @@
 # install.packages('dplyr')
 # install.packages('shiny')
 # install.packages('scales')
+# install.packages('DT')
 
 library("ggplot2")
 library("dplyr")
 library("shiny")
 library("scales")
+library("DT")
 
 # functions
 # load data from csv file
@@ -128,7 +130,38 @@ analysis1 = function(data, season, origin) {
               ))
 }
 
-# Analysis2
+# Analysis 1.1
+analysis1.1 = function(data, origin) {
+  print(sort(unique(data$wind_dir)))
+  data = filterOrigin(data, origin)
+  
+  data$temp = farenheitToCelcius(data$temp)
+  View(data)
+  
+  plot1 = ggplot(data, aes(wind_dir, temp, color=origin)) + 
+    geom_jitter() + 
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 36))
+  
+  temp_counter = 0
+  angle_column = c()
+  amount_column = c()
+  
+  for(i in seq(0, 360, by=10)) {
+    angle_column = append(angle_column, temp_counter)
+    amount_column = append(amount_column, nrow(data[which(data$wind_dir == temp_counter),]))
+    temp_counter = temp_counter + 10
+  }
+  
+  table = data.frame("Angle(\u00B0)"=angle_column, "NumberOfTemperatures"=amount_column)
+  
+  print(sum(table$NumberOfTemperatures))
+  
+  print(plot1)
+  return (list(plot1,
+               table))
+}
+
+# Analysis 2
 analysis2 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -176,6 +209,7 @@ analysis2 = function(data, season, origin) {
                ))
 }
 
+# Analysis 2.1
 analysis2.1 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -223,6 +257,7 @@ analysis2.1 = function(data, season, origin) {
   ))
 }
 
+# Analysis 2.2
 analysis2.2 = function(data) {
   # plot1 = ggplot(data, aes(x = wind_dir, fill=origin)) + 
   #   geom_histogram()
@@ -238,7 +273,7 @@ analysis2.2 = function(data) {
               ))
 }
 
-# Analysis3
+# Analysis 3
 analysis3 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -290,6 +325,7 @@ analysis3 = function(data, season, origin) {
   ))
 }
 
+# Analysis 4
 analysis4 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -587,6 +623,27 @@ main = function() {
                         h5(textOutput("text1_11"))
                  ),
                ),
+      ),
+      tabPanel(title = "Analysis 1.1",
+               fluidRow(
+                 column(4,
+                        selectInput("origin_1.1", h3("Select Origin"),
+                                    choices = list("JFK and LGA" = 1,
+                                                   "JFK" = 2,
+                                                   "LGA" = 3),
+                                    selected = 1)
+                        
+                        )
+               ),
+      
+               h3("Temperature (\u00B0C) and Wind Direction (mph)"),
+               plotOutput("diagram1.1"),
+               
+               fluidRow(
+                 column(12,
+                        DT::dataTableOutput("table1.1")
+                 )
+              ),
       ),
       tabPanel(title = "Analysis 2",
                fluidRow(
@@ -1083,6 +1140,15 @@ main = function() {
       
       output$text1_11 <- renderText({
         paste("Max :", current_analysis[11])
+      })
+    })
+    
+    output$diagram1.1 <- renderPlot({
+      current_analysis = analysis1.1(data, input$origin_1.1)
+      current_analysis[1]
+      
+      output$table1.1 <- DT::renderDataTable({
+        current_analysis[[2]]
       })
     })
     
