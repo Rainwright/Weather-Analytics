@@ -5,15 +5,15 @@ Temperature
 
 * [x] Analysis 1 - What is the mean, median, standard deviation, min and max temperature at both airports for each season/ What are the mean temperature of each season in a year
 
-* [ ] Analysis 1.1 - How temperature affects wind direction from both airports
+* [x] Analysis 1.1 - How temperature affects wind direction from both airports
 
 Wind
 
 * [x] Analysis 2 - What is the mean, median, standard deviation, min and max wind speed at both airports for each season
 
-* [ ] Analysis 2.1 - What is the mean, min and max wind gust at both airports for each season
+* [x] Analysis 2.1 - What is the mean, min and max wind gust at both airports for each season
 
-* [ ] Analysis 2.2 - What is the mean, min and max wind direction at both airports for each season
+* [x] Analysis 2.2 - What is the mean, min and max wind direction at both airports for each season
 
 * [ ] Analysis 2.3 - Does wind gust increments with wind speed at a constant ratio
 
