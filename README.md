@@ -41,7 +41,7 @@ Visibility
 Dewpoint
 * [x] Analysis 5 - What is the mean, median, standard deviation, min and max dewpoint at both airports for each season
 
-* [ ] Analysis 5.1 - Does temperature and dewpoint affects precipitation
+* [x] Analysis 5.1 - Does temperature and dewpoint affects precipitation
 
 Humidity
 * [x] Analysis 6 - What is the mean, median, standard deviation, min and max humidity at both airports for each season
