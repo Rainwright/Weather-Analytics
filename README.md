@@ -37,7 +37,7 @@ Visibility
 
 * [x] Analysis 4.1 - How does hour of the day affects visibility
 
-* [ ] Analysis 4.2 - Does precipitation effects visibility 
+* [x] Analysis 4.2 - Does precipitation effects visibility 
 
 Dewpoint
 * [x] Analysis 5 - What is the mean, median, standard deviation, min and max dewpoint at both airports for each season
