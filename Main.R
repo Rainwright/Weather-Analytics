@@ -7,12 +7,14 @@
 # install.packages('shiny')
 # install.packages('scales')
 # install.packages('DT')
+# install.packages('reshape2')
 
 library("ggplot2")
 library("dplyr")
 library("shiny")
 library("scales")
 library("DT")
+library("reshape2")
 
 # functions
 # load data from csv file
@@ -425,6 +427,49 @@ analysis5 = function(data, season, origin) {
                # lga max value and date
                farenheitToCelcius(max(original_data$dewp[original_data$origin == "LGA"]))
   ))
+}
+
+# Analysis 5.1
+analysis5.1 = function(data, origin) {
+  data = filterOrigin(data, origin)
+  data$temp = farenheitToCelcius(data$temp)
+  data$dewp = farenheitToCelcius(data$dewp)
+  
+  mean_temp = mean(data$temp)
+  median_temp = median(data$temp)
+  mean_dewp = mean(data$dewp)
+  median_dewp = median(data$dewp)
+  
+  mixed_df = data.frame("temp" = data$temp,
+                        "dewp" = data$dewp,
+                        "precip" = data$precip)
+  mixed_df = melt(mixed_df, id.vars = 'precip', variable.name = "variable")
+  
+  plot1 = ggplot(mixed_df, aes(value, precip, color=variable)) +
+      geom_point() + 
+      geom_vline(aes(xintercept = mean_dewp), colour="red") +
+      geom_vline(aes(xintercept = median_dewp), colour="blue", linetype="dashed") +
+      geom_vline(aes(xintercept = mean_temp), colour="red") +
+      geom_vline(aes(xintercept = median_temp), colour="blue", linetype="dashed")
+  
+  data = transform(data, "tempDewpDiff"= data$temp - data$dewp)
+  average_temp_dewp = calculateAverageAgainstTime(data, data$tempDewpDiff)
+  
+  mean_temp_dewp_diff = mean(average_temp_dewp$AverageValue)
+  
+  plot1.1 = ggplot(average_temp_dewp, aes(Date, AverageValue, color=Origin)) +
+    geom_point() +
+    geom_line() + 
+    geom_hline(aes(yintercept = mean_temp_dewp_diff), colour="red")
+  
+  print(plot1)
+  return (list(plot1,
+               plot1.1,
+               round(mean_temp, 2),
+               round(median_temp, 2),
+               round(mean_dewp, 2),
+               round(median_dewp, 2),
+               round(mean_temp_dewp_diff, 2)))
 }
 
 # Analysis 6
@@ -998,6 +1043,32 @@ main = function() {
                  ),
                ),
       ),
+      tabPanel(title = "Analysis 5.1",
+               fluidRow(
+                 column(4,
+                        selectInput("origin_5.1", h3("Select Origin"),
+                                    choices = list("JFK and LGA" = 1,
+                                                   "JFK" = 2,
+                                                   "LGA" = 3),
+                                    selected = 1)
+                 )
+               ),
+               h3("Temperature & Dewpoint against Precipitation (\u00B0C)"),
+               plotOutput("diagram5.1"),
+               fluidRow(
+                 column(6,
+                        h5(textOutput("text5.1_3")),
+                        h5(textOutput("text5.1_4"))
+                 ),
+                 column(6,
+                        h5(textOutput("text5.1_5")),
+                        h5(textOutput("text5.1_6"))
+                 )
+               ),
+               h3("Temperature-Dewpoint Difference against Time (\u00B0C)"),
+               plotOutput("diagram5.1_1"),
+               h5(textOutput("text5.1_7"))
+      ),
       tabPanel(title = "Analysis 6",
                fluidRow(
                  column(4,
@@ -1066,32 +1137,6 @@ main = function() {
                  ),
                ),
       )
-      
-      # tabPanel(title = "Analysis 3",
-      #          plotOutput("diagram3"),
-      # ),
-      # tabPanel(title = "Analysis 4",
-      #          plotOutput("diagram4"),
-      #          
-      # ),
-      # tabPanel(title = "Analysis 5",
-      #          plotOutput("diagram5"),
-      #          selectInput("datequartile", h3("Select Quartile"),
-      #                      choices = list("1st" = 1,
-      #                                     "2nd" = 2,
-      #                                     "3rd" = 3,
-      #                                     "4th" = 4,
-      #                                     "Overall" = 5),
-      #                      selected = 5),
-      #          selectInput("origin_5", h3("Select Origin"),
-      #                      choices = list("JFK" = 1,
-      #                                     "LGA" = 2,
-      #                                     "JFK and LGA" = 3),
-      #                      selected = 3)
-      # ),
-      # tabPanel(title = "Analysis 6",
-      #          plotOutput("diagram6"),
-      # )
     )
   )
   
@@ -1390,6 +1435,35 @@ main = function() {
       })
     })
     
+    output$diagram5.1 <- renderPlot({
+      current_analysis = analysis5.1(data, input$origin_5.1)
+      current_analysis[1]
+      
+      output$diagram5.1_1 <- renderPlot({
+        current_analysis[2]
+      })
+      
+      output$text5.1_3 <- renderText({
+        paste("Mean Temperature :", current_analysis[3])
+      })
+      
+      output$text5.1_4 <- renderText({
+        paste("Median Temperature :", current_analysis[4])
+      })
+      
+      output$text5.1_5 <- renderText({
+        paste("Mean Dewpoint :", current_analysis[5])
+      })
+      
+      output$text5.1_6 <- renderText({
+        paste("Median Dewpoint :", current_analysis[6])
+      })
+      
+      output$text5.1_7 <- renderText({
+        paste("Mean Temperature-Dewpoint Difference :", current_analysis[6])
+      })
+    })
+    
     output$diagram6 <- renderPlot({
       current_analysis = analysis6(data, input$season_6, input$origin_6)
       current_analysis[1]
@@ -1434,22 +1508,6 @@ main = function() {
         paste("Max :", current_analysis[11])
       })
     })
-    # 
-    # output$diagram3 <- renderPlot({
-    #   analysis3(data)
-    # })
-    # 
-    # output$diagram4 <- renderPlot({
-    #   analysis4(data,input$season)
-    # })
-    # 
-    # output$diagram5 <- renderPlot({
-    #   analysis5(data,input$datequartile, input$origin_5)
-    # })
-    # 
-    # output$diagram6 <- renderPlot({
-    #   analysis6(data)
-    # })
   }
 
   shinyApp(ui = ui, server = server)
@@ -1457,3 +1515,4 @@ main = function() {
 
 main()
 
+  
