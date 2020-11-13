@@ -15,7 +15,7 @@ Wind
 
 * [x] Analysis 2.2 - What is the mean, min and max wind direction at both airports for each season
 
-* [ ] Analysis 2.3 - Does wind gust increments with wind speed at a constant ratio
+* [x] Analysis 2.3 - Does wind gust increments with wind speed (Relationship between wind gust and wind speed)?
 
 * [ ] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed
 
@@ -27,7 +27,9 @@ Precipitation
 
 * [x] Analysis 3 - What is the mean, median, standard deviation, min and max precipitation at both airports for each season
 
-* [ ] Analysis 3.1 - Does wind direction affects precipitation
+* [ ] Analysis 3.1 - How to determine rain or snow using precipitation and temperature, how does it look against time? 
+
+* [ ] Analysis 3.2 - Does wind direction affects precipitation
 
 Visibility
 * [x] Analysis 4 - What is the mean, median, standard deviation, min and max visibility at both airports for each season
