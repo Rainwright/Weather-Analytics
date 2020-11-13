@@ -27,7 +27,7 @@ Precipitation
 
 * [x] Analysis 3 - What is the mean, median, standard deviation, min and max precipitation at both airports for each season
 
-* [ ] Analysis 3.1 - How to determine rain or snow using precipitation and temperature, how does it look against time? 
+* [x] Analysis 3.1 - How to determine rain or snow using precipitation and temperature, how does it look against time? 
 
 * [ ] Analysis 3.2 - Does wind direction affects precipitation
 
