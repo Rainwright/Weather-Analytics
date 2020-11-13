@@ -27,7 +27,7 @@ Precipitation
 
 * [x] Analysis 3 - What is the mean, median, standard deviation, min and max precipitation at both airports for each season
 
-* [ ] Analysis 3.1 - Does wind direction affectes precipitation
+* [ ] Analysis 3.1 - Does wind direction affects precipitation
 
 Visibility
 * [x] Analysis 4 - What is the mean, median, standard deviation, min and max visibility at both airports for each season
