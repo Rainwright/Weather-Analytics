@@ -19,9 +19,7 @@ Wind
 
 * [ ] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
 
-* [ ] Analysis 2.5 - How to predict rain using wind direction
-
-* [ ] Analysis 2.6 - How to predict rain using wind pressure
+* [ ] Analysis 2.5 - How to predict rain using wind direction and wind pressure
 
 Precipitation
 
