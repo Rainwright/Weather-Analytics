@@ -314,6 +314,48 @@ analysis2.3 = function(data, origin) {
                plot1.1))
 }
 
+# Analysis 2.4
+analysis2.4 = function(data) {
+  # print(sort(unique(data$wind_speed)))
+  # print(sort(unique(data$wind_dir)))
+  
+  # JFK     # LGA
+  # 43.9    # 45.3
+  # 133.9   # 135.3
+  # 223.9   # 225.3
+  # 313.9   # 315.3
+  
+  data = transform(data, "isdangerous" = ifelse((origin == 'JFK') & (wind_speed >= 30), "Yes", "No"))
+  data = transform(data, "isdangerous" = ifelse((origin == 'LGA') & (wind_speed >= 30), "Yes", "No"))
+  
+  data = data[!is.na(data$isdangerous), ]
+  
+  plot1 = ggplot(data[(data$origin == 'JFK') & (((data$wind_dir >= 20) & (data$wind_dir <= 60)) | ((data$wind_dir >= 200) & (data$wind_dir <= 240))),], aes(new_time, wind_speed, color=isdangerous)) +
+    geom_jitter() + 
+    scale_colour_discrete(na.translate = F)
+  
+  plot1.1 = ggplot(data[(data$origin == 'JFK') & (((data$wind_dir >= 110) & (data$wind_dir <= 150)) | ((data$wind_dir >= 290) & (data$wind_dir <= 330))),], aes(new_time, wind_speed, color=isdangerous)) +
+    geom_jitter() + 
+    scale_colour_discrete(na.translate = F)
+  
+  plot1.2 = ggplot(data[(data$origin == 'LGA') & (((data$wind_dir >= 20) & (data$wind_dir <= 60)) | ((data$wind_dir >= 200) & (data$wind_dir <= 240))),], aes(new_time, wind_speed, color=isdangerous)) +
+    geom_jitter() + 
+    scale_colour_discrete(na.translate = F)
+  
+  plot1.3 = ggplot(data[(data$origin == 'LGA') & (((data$wind_dir >= 110) & (data$wind_dir <= 150)) | ((data$wind_dir >= 290) & (data$wind_dir <= 330))),], aes(new_time, wind_speed, color=isdangerous)) +
+    geom_jitter() + 
+    scale_colour_discrete(na.translate = F)
+  
+  table = subset(data, isdangerous == 'Yes' & (((wind_dir >= 110) & (wind_dir <= 150)) | ((wind_dir >= 290) & (wind_dir <= 330))))
+  
+  print(plot1)
+  return (list(plot1,
+               plot1.1,
+               plot1.2,
+               plot1.3,
+               table))
+}
+ 
 # Analysis 3
 analysis3 = function(data, season, origin) {
   data = filterSeason(data, season)
@@ -490,22 +532,24 @@ analysis4.2 = function(data, origin) {
   median_visib = mean(data$visib)
   median_precip = mean(data$precip)
   
-  plot1 = ggplot(data, aes(precip, visib, color=origin)) +
+  plot1 = ggplot(data, aes(visib, precip, color=origin)) +
     geom_jitter(width = 0.5, height = 0.5) + 
-    geom_vline(aes(xintercept = median_precip), colour="red") +
-    geom_hline(aes(yintercept = median_visib), colour="blue") +
+    geom_vline(aes(xintercept = median_visib), colour="red") +
+    geom_hline(aes(yintercept = median_precip), colour="blue") + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) 
+    ylim(0, 1)
   
   median_filtered_visib = mean(data$visib[data$visib < 10])
   median_filtered_precip = mean(data$precip[data$precip > 0])
   
-  plot1.1 = ggplot(data[(data$visib < 10) & (data$precip > 0),], aes(precip, visib, color=origin)) +
+  plot1.1 = ggplot(data[(data$visib < 10) & (data$precip > 0),], aes(visib, precip, color=origin)) +
     geom_jitter(width = 0.5, height = 0.5) + 
-    geom_vline(aes(xintercept = median_filtered_precip), colour="red") +
-    geom_hline(aes(yintercept = median_filtered_visib), colour="blue") +
+    geom_vline(aes(xintercept = median_filtered_visib), colour="red") +
+    geom_hline(aes(yintercept = median_filtered_precip), colour="blue") + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) 
+    ylim(0, 1)
+  
+  View(data)
   
   print(plot1)
   return (list(plot1,
@@ -661,71 +705,16 @@ analysis6 = function(data, season, origin) {
   ))
 }
 
-# analysis5 = function(data, quartile, origin) {
-#   # plot = ggplot(na.omit(data[data$visib < 10,]), aes(x =visib, group=origin, fill=origin)) +
-#   #   geom_histogram() +
-#   #   scale_x_continuous(breaks = round(seq(min(data$visib), max(data$visib), by = 0.5),1))
-#   
-#   min_visib = 10
-#   visib_counter = 0
-#   origin_column = c()
-#   date_column = c()
-#   min_visib_column = c()
-#   
-#   for(i in 1:nrow(data)) {
-#     if(i == 1) {
-#       currentDate = data$new_time[i]
-#     } else {
-#       if(data$new_time[i] == currentDate) {
-#         if(data$visib[i] < min_visib) {
-#           min_visib = data$visib[i]
-#         }
-#       } else {
-#         origin_column = append(origin_column, data$origin[i - 1])
-#         date_column = append(date_column, currentDate)
-#         min_visib_column = append(min_visib_column, min_visib)
-#         # reset variables
-#         min_visib = 10
-#         visib_counter = 0
-#         # change time to next day
-#         currentDate = data$new_time[i]
-#       }
-#     }
-#   }
-#   
-#   min_daily_visib = data.frame("Origin"=origin_column, "Date"=date_column, "MinVisib"=min_visib_column)
-#   
-#   min_daily_visib = switch(quartile,
-#                           "1"=min_daily_visib[(min_daily_visib['Date'] >= "2013-01-01") & (min_daily_visib['Date'] <= "2013-04-01"),],
-#                           "2"=min_daily_visib[(min_daily_visib['Date'] >= "2013-04-01") & (min_daily_visib['Date'] <= "2013-07-01"),],
-#                           "3"=min_daily_visib[(min_daily_visib['Date'] >= "2013-07-01") & (min_daily_visib['Date'] <= "2013-10-01"),],
-#                           "4"=min_daily_visib[(min_daily_visib['Date'] >= "2013-10-01") & (min_daily_visib['Date'] <= "2013-12-30"),],
-#                           min_daily_visib)
-#   
-#   min_daily_visib = switch(origin, 
-#                 "1"=min_daily_visib[min_daily_visib$Origin == "JFK",], 
-#                 "2"=min_daily_visib[min_daily_visib$Origin == "LGA",], 
-#                 min_daily_visib)
-#   
-#   plot = ggplot(min_daily_visib[min_daily_visib$MinVisib < 10,], aes(Date, MinVisib, color=Origin)) +
-#     geom_jitter() +
-#     geom_line() +
-#     scale_y_continuous(breaks = round(seq(min(min_daily_visib$MinVisib), max(min_daily_visib$MinVisib), by = 0.5),1))
-#   return (plot)
-# }
-#  
-# Analysis 6
-# analysis6 = function(data) {
-#   # plot = ggplot(na.omit(data[(data$wind_dir >= 45) & (data$wind_dir <= 135),]), aes(x = new_time, group=origin, fill=origin)) + 
-#   #   geom_histogram() + 
-#   #   # scale_x_date(breaks="month", labels=date_format("%b"))
-#   #   scale_x_date(breaks = breaks_pretty(10))
-#   plot = ggplot(na.omit(data[(data$wind_dir > 0) & (data$wind_dir < 180),]), aes(x = new_time, group=origin, fill=origin)) + 
-#     geom_histogram() + 
-#     # scale_x_date(breaks="month", labels=date_format("%b"))
-#     scale_x_date(breaks = breaks_pretty(10))
-#   return (plot)
-# }
+# Analysis 6.1
+analysis6.1 = function(data) {
+  data$temp = farenheitToCelcius(data$temp)
+  data = transform(data, "frosting" = ifelse((humid == 100) & (temp < 0), "Yes", "No"))
+  
+  plot1 = ggplot(data, aes(new_time, temp, color=frosting)) +
+    geom_jitter()
+  
+  return (list(plot1))
+}
 
 main = function() {
   data = loadData()
@@ -825,7 +814,7 @@ main = function() {
                  column(12,
                         DT::dataTableOutput("table1.1")
                  )
-              ),
+               ),
       ),
       tabPanel(title = "Analysis 2",
                fluidRow(
@@ -990,6 +979,29 @@ main = function() {
                h3("Wind Gust Against Wind Speed (mph)"),               
                h4("After Replacing NA Values"),
                plotOutput("diagram2.3_1")
+      ),
+      tabPanel(title = "Analysis 2.4",
+               h3("Wind Speed Against Time in JFK"),
+               h4("Wind Direction [20-60\u00B0, 200-240\u00B0]"),
+               plotOutput("diagram2.4"),
+               
+               h3("Wind Speed Against Time in JFK"),
+               h4("Wind Direction [110-150\u00B0, 290-330\u00B0]"),
+               plotOutput("diagram2.4_1"),
+               
+               h3("Wind Speed Against Time in LGA"),
+               h4("Wind Direction [20-60\u00B0, 200-240\u00B0]"),
+               plotOutput("diagram2.4_2"),
+               
+               h3("Wind Speed Against Time in LGA"),
+               h4("Wind Direction [110-150\u00B0, 290-330\u00B0]"),
+               plotOutput("diagram2.4_3"),
+               
+               fluidRow(
+                 column(12,
+                        DT::dataTableOutput("table2.4")
+                 )
+               ),
       ),
       tabPanel(title = "Analysis 3",
                fluidRow(
@@ -1378,6 +1390,10 @@ main = function() {
                         h5(textOutput("text6_11"))
                  ),
                ),
+      ),
+      tabPanel(title = "Analysis 6.1",
+               h3("Frosting against Time"),
+               plotOutput("diagram6.1"),
       )
     )
   )
@@ -1548,6 +1564,27 @@ main = function() {
       
       output$diagram2.3_1 <- renderPlot({
         current_analysis[2]
+      })
+    })
+    
+    output$diagram2.4 <- renderPlot({
+      current_analysis = analysis2.4(data)
+      current_analysis[1]
+      
+      output$diagram2.4_1 <- renderPlot({
+        current_analysis[2]
+      })
+      
+      output$diagram2.4_2 <- renderPlot({
+        current_analysis[3]
+      })
+      
+      output$diagram2.4_3 <- renderPlot({
+        current_analysis[4]
+      })
+      
+      output$table2.4 <- DT::renderDataTable({
+        current_analysis[[5]]
       })
     })
     
@@ -1818,6 +1855,11 @@ main = function() {
       output$text6_11 <- renderText({
         paste("Max :", current_analysis[11])
       })
+    })
+    
+    output$diagram6.1 <- renderPlot({
+      current_analysis = analysis6.1(data)
+      current_analysis[1]
     })
   }
 
