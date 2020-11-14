@@ -17,7 +17,7 @@ Wind
 
 * [x] Analysis 2.3 - Does wind gust increments with wind speed (Relationship between wind gust and wind speed)?
 
-* [ ] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
+* [x] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
 
 * [ ] Analysis 2.5 - How to predict rain using wind direction and wind pressure
 
