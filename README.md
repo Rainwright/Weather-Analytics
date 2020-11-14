@@ -42,7 +42,7 @@ Dewpoint
 Humidity
 * [x] Analysis 6 - What is the mean, median, standard deviation, min and max humidity at both airports for each season
 
-* [ ] Analysis 6.1 - How to predict frosting using dewpoint and humidity
+* [ ] Analysis 6.1 - How to predict frosting using temperature, dewpoint, humidity
 
 Note: 
 1. Produce all mean, median, standard deviation
