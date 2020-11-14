@@ -19,8 +19,6 @@ Wind
 
 * [x] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
 
-* [ ] Analysis 2.5 - How to predict rain using wind direction and wind pressure
-
 Precipitation
 
 * [x] Analysis 3 - What is the mean, median, standard deviation, min and max precipitation at both airports for each season
