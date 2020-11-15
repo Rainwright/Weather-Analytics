@@ -22,8 +22,8 @@ library("ggpmisc")
 # load data from csv file
 loadData = function() {
   # import file, path may vary from pc to pc
-  # data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Program/weatherdata.csv", header=TRUE, sep=",")
-  data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
+  data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Weather Analytics/weatherdata.csv", header=TRUE, sep=",")
+  # data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
   options(max.print=1000000)
   print(colnames(data))
   return (data)
@@ -35,6 +35,7 @@ farenheitToCelcius = function(farenheit){
   return (round((farenheit - 32) * 5/9, 2))
 }
 
+# filter data origin from ui button controls
 filterOrigin = function(data, origin) {
   data = switch(origin, 
                 "2"=data[data$origin == "JFK",], 
@@ -43,6 +44,7 @@ filterOrigin = function(data, origin) {
   return (data)
 }
 
+# filter data season from ui button controls
 filterSeason = function(data, season) {
   data = switch(season,
                 "2"=data[(data['new_time'] >= "2013-03-20") & (data['new_time'] <= "2013-06-21"),],
@@ -53,24 +55,36 @@ filterSeason = function(data, season) {
   return (data)
 }
 
+# calculate average of one data column according to per day
+# @param
+# data - dataset
+# subject - name of data column
 calculateAverageAgainstTime = function(data, subject) {
+  # variable to hold cumulative of subject
   temp_subject = 0
+  # counter to know how many hours per day to calculate average
   subject_counter = 0
+  
+  # new data frame columns
   origin_column = c()
   date_column = c()
   average_subject_column = c()
   
   for(i in 1:nrow(data)) {
     if(i == 1) {
+      # set current date for first row to avoid error
       currentDate = data$new_time[i]
     } else {
       if(data$new_time[i] == currentDate) {
-        # add subject to cumulative
+        # add value of subject to cumulative
         temp_subject = temp_subject + subject[i]
         subject_counter = subject_counter + 1
       } else {
+        # origin column
         origin_column = append(origin_column, data$origin[i - 1])
+        # date column
         date_column = append(date_column, currentDate)
+        # average value column
         average_subject_column = append(average_subject_column, round(temp_subject / subject_counter, 2))
         # reset variables
         temp_subject = 0
@@ -81,6 +95,7 @@ calculateAverageAgainstTime = function(data, subject) {
     }
   }
   
+  # create and return new data frame
   average_daily_subject = data.frame("Origin"=origin_column, "Date"=date_column, "AverageValue"=average_subject_column)
   return (average_daily_subject)
 }
@@ -90,6 +105,7 @@ analysis1 = function(data, season, origin) {
   data = filterSeason(data, season)
   
   original_data = data
+  original_data$temp = farenheitToCelcius(original_data$temp)
   
   data = filterOrigin(data, origin)
   
@@ -120,17 +136,17 @@ analysis1 = function(data, season, origin) {
               # sd value
               round(sd_temp, 2),
               # overall min value and date
-              min(average_daily_temp$AverageValue),
+              paste(min(average_daily_temp$AverageValue), "On", average_daily_temp$Date[which.min(average_daily_temp$AverageValue)]),
               # overall max value and date
-              max(average_daily_temp$AverageValue),
+              paste(max(average_daily_temp$AverageValue), "On", average_daily_temp$Date[which.max(average_daily_temp$AverageValue)]),
               # jfk min value and date
-              farenheitToCelcius(min(original_data$temp[original_data$origin == "JFK"])),
+              paste(min(original_data$temp[original_data$origin == "JFK"]), "On", original_data$new_time[which.min(original_data$temp[original_data$origin == "JFK"])]),
               # jfk max value and date
-              farenheitToCelcius(max(original_data$temp[original_data$origin == "JFK"])),
+              paste(max(original_data$temp[original_data$origin == "JFK"]), "On", original_data$new_time[which.max(original_data$temp[original_data$origin == "JFK"])]),
               # lga min value and date
-              farenheitToCelcius(min(original_data$temp[original_data$origin == "LGA"])),
+              paste(min(original_data$temp[original_data$origin == "LGA"]), "On", original_data$new_time[which.min(original_data$temp[original_data$origin == "LGA"])]),
               # lga max value and date
-              farenheitToCelcius(max(original_data$temp[original_data$origin == "LGA"]))
+              paste(max(original_data$temp[original_data$origin == "LGA"]), "On", original_data$new_time[which.max(original_data$temp[original_data$origin == "LGA"])])
               ))
 }
 
@@ -767,30 +783,30 @@ main = function() {
                
                h4("Overall Temperatures:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_7"))
                  ),
                ),
                
                h4("JFK Temperatures:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_9"))
                  ),
                ),
                
                h4("LGA Temperatures:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text1_11"))
                  ),
                ),
