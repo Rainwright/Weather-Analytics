@@ -17,11 +17,7 @@ Wind
 
 * [x] Analysis 2.3 - Does wind gust increments with wind speed (Relationship between wind gust and wind speed)?
 
-* [ ] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
-
-* [ ] Analysis 2.5 - How to predict rain using wind direction
-
-* [ ] Analysis 2.6 - How to predict rain using wind pressure
+* [x] Analysis 2.4 - When is the most dangerous time to take flight based on wind speed and wind direction
 
 Precipitation
 
@@ -46,7 +42,7 @@ Dewpoint
 Humidity
 * [x] Analysis 6 - What is the mean, median, standard deviation, min and max humidity at both airports for each season
 
-* [ ] Analysis 6.1 - How to predict frosting using dewpoint and humidity
+* [x] Analysis 6.1 - How to predict frosting using temperature, dewpoint, humidity
 
 Note: 
 1. Produce all mean, median, standard deviation
