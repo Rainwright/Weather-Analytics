@@ -22,8 +22,8 @@ library("ggpmisc")
 # load data from csv file
 loadData = function() {
   # import file, path may vary from pc to pc
-  data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Weather Analytics/weatherdata.csv", header=TRUE, sep=",")
-  # data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
+  # data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Weather Analytics/weatherdata.csv", header=TRUE, sep=",")
+  data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
   options(max.print=1000000)
   print(colnames(data))
   return (data)
@@ -114,7 +114,8 @@ analysis1 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_temp, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
+    geom_line() +
+    labs(x = "Date", y = "Average Temperature", color = "Origin")
   
   data$temp = farenheitToCelcius(data$temp)
   mean_temp = mean(data$temp)
@@ -124,7 +125,8 @@ analysis1 = function(data, season, origin) {
   plot1.1 = ggplot(data, aes(x = temp, fill=origin)) + 
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_temp), colour="red") +
-    geom_vline(aes(xintercept = median_temp), colour="blue", linetype="dashed")
+    geom_vline(aes(xintercept = median_temp), colour="blue", linetype="dashed") +
+    labs(x = "Temperature", y = "Frequency", color = "Origin")
 
   print(plot1)
   return(list(plot1,
@@ -156,11 +158,11 @@ analysis1.1 = function(data, origin) {
   data = filterOrigin(data, origin)
   
   data$temp = farenheitToCelcius(data$temp)
-  View(data)
-  
+
   plot1 = ggplot(data, aes(wind_dir, temp, color=origin)) + 
     geom_jitter() + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 36))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 36)) +
+    labs(x = "Temperature", y = "Wind Direction", color = "Origin")
   
   temp_counter = 0
   angle_column = c()
@@ -174,7 +176,7 @@ analysis1.1 = function(data, origin) {
   
   table = data.frame("Angle(\u00B0)"=angle_column, "NumberOfTemperatures"=amount_column)
   
-  print(sum(table$NumberOfTemperatures))
+  print(table)
   
   print(plot1)
   return (list(plot1,
@@ -193,7 +195,8 @@ analysis2 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_winds, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
+    geom_line() +
+    labs(x = "Date", y = "Average Wind Speed", color = "Origin")
   
   mean_winds = mean(data$wind_speed)
   median_winds = median(data$wind_speed)
@@ -203,7 +206,8 @@ analysis2 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_winds), colour="red") +
     geom_vline(aes(xintercept = median_winds), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+    labs(x = "Wind Speed", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -215,17 +219,17 @@ analysis2 = function(data, season, origin) {
                # sd value
                round(sd_winds, 2),
                # overall min value and date
-               min(average_daily_winds$AverageValue),
+               paste(min(average_daily_winds$AverageValue), "On", average_daily_winds$Date[which.min(average_daily_winds$AverageValue)]),
                # overall max value and date
-               max(average_daily_winds$AverageValue),
+               paste(max(average_daily_winds$AverageValue), "On", average_daily_winds$Date[which.max(average_daily_winds$AverageValue)]),
                # jfk min value and date
-               round(min(original_data$wind_speed[original_data$origin == "JFK"]), 2),
+               paste(round(min(original_data$wind_speed[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$wind_speed[original_data$origin == "JFK"])]),
                # jfk max value and date
-               round(max(original_data$wind_speed[original_data$origin == "JFK"]), 2),
+               paste(round(max(original_data$wind_speed[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$wind_speed[original_data$origin == "JFK"])]),
                # lga min value and date
-               round(min(original_data$wind_speed[original_data$origin == "LGA"]), 2),
+               paste(round(min(original_data$wind_speed[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$wind_speed[original_data$origin == "LGA"])]),
                # lga max value and date
-               round(max(original_data$wind_speed[original_data$origin == "LGA"]), 2)
+               paste(round(max(original_data$wind_speed[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$wind_speed[original_data$origin == "LGA"])])
                ))
 }
 
@@ -241,7 +245,8 @@ analysis2.1 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_windg, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
+    geom_line() +
+    labs(x = "Date", y = "Average Wind Gusts", color = "Origin")
   
   mean_windg = mean(data$wind_gust)
   median_windg = median(data$wind_gust)
@@ -251,7 +256,8 @@ analysis2.1 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_windg), colour="red") +
     geom_vline(aes(xintercept = median_windg), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+    labs(x = "Wind Gust", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -263,18 +269,18 @@ analysis2.1 = function(data, season, origin) {
                # sd value
                round(sd_windg, 2),
                # overall min value and date
-               min(average_daily_windg$AverageValue),
+               paste(min(average_daily_windg$AverageValue), "On", average_daily_windg$Date[which.min(average_daily_windg$AverageValue)]),
                # overall max value and date
-               max(average_daily_windg$AverageValue),
+               paste(max(average_daily_windg$AverageValue), "On", average_daily_windg$Date[which.max(average_daily_windg$AverageValue)]),
                # jfk min value and date
-               round(min(original_data$wind_gust[original_data$origin == "JFK"]), 2),
+               paste(round(min(original_data$wind_gust[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$wind_gust[original_data$origin == "JFK"])]),
                # jfk max value and date
-               round(max(original_data$wind_gust[original_data$origin == "JFK"]), 2),
+               paste(round(max(original_data$wind_gust[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$wind_gust[original_data$origin == "JFK"])]),
                # lga min value and date
-               round(min(original_data$wind_gust[original_data$origin == "LGA"]), 2),
+               paste(round(min(original_data$wind_gust[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$wind_gust[original_data$origin == "LGA"])]),
                # lga max value and date
-               round(max(original_data$wind_gust[original_data$origin == "LGA"]), 2)
-  ))
+               paste(round(max(original_data$wind_gust[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$wind_gust[original_data$origin == "LGA"])])
+               ))
 }
 
 # Analysis 2.2
@@ -284,7 +290,8 @@ analysis2.2 = function(data) {
   # 
   plot1 = ggplot(data, aes(y = wind_dir, x = 1, fill=origin)) + 
     geom_boxplot() + 
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 18))
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 18)) +
+    labs(y = "Wind Direction", fill = "Origin")
   
   print(plot1)
   return(list(plot1,
@@ -304,7 +311,8 @@ analysis2.3 = function(data, origin) {
                  aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                  parse = TRUE) +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 12))
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 12)) +
+    labs(x = "Wind Speed", y = "Wind Gust", color = "Origin")
   
   # x = wind_speed
   # y = wind_gust
@@ -323,7 +331,8 @@ analysis2.3 = function(data, origin) {
                  aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                  parse = TRUE) +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 12))
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 12)) +
+    labs(x = "Wind Speed", y = "Wind Gust", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -345,22 +354,26 @@ analysis2.4 = function(data) {
   data = transform(data, "isdangerous" = ifelse((origin == 'LGA') & (wind_speed >= 30), "Yes", "No"))
   
   data = data[!is.na(data$isdangerous), ]
-  
+
   plot1 = ggplot(data[(data$origin == 'JFK') & (((data$wind_dir >= 20) & (data$wind_dir <= 60)) | ((data$wind_dir >= 200) & (data$wind_dir <= 240))),], aes(new_time, wind_speed, color=isdangerous)) +
     geom_jitter() + 
-    scale_colour_discrete(na.translate = F)
+    scale_colour_discrete(na.translate = F) +
+    labs(x = "Date", y = "Wind Speed", color = "Is Dangerous")
   
   plot1.1 = ggplot(data[(data$origin == 'JFK') & (((data$wind_dir >= 110) & (data$wind_dir <= 150)) | ((data$wind_dir >= 290) & (data$wind_dir <= 330))),], aes(new_time, wind_speed, color=isdangerous)) +
     geom_jitter() + 
-    scale_colour_discrete(na.translate = F)
+    scale_colour_discrete(na.translate = F) +
+    labs(x = "Date", y = "Wind Speed", color = "Is Dangerous")
   
   plot1.2 = ggplot(data[(data$origin == 'LGA') & (((data$wind_dir >= 20) & (data$wind_dir <= 60)) | ((data$wind_dir >= 200) & (data$wind_dir <= 240))),], aes(new_time, wind_speed, color=isdangerous)) +
     geom_jitter() + 
-    scale_colour_discrete(na.translate = F)
+    scale_colour_discrete(na.translate = F) +
+    labs(x = "Date", y = "Wind Speed", color = "Is Dangerous")
   
   plot1.3 = ggplot(data[(data$origin == 'LGA') & (((data$wind_dir >= 110) & (data$wind_dir <= 150)) | ((data$wind_dir >= 290) & (data$wind_dir <= 330))),], aes(new_time, wind_speed, color=isdangerous)) +
     geom_jitter() + 
-    scale_colour_discrete(na.translate = F)
+    scale_colour_discrete(na.translate = F) +
+    labs(x = "Date", y = "Wind Speed", color = "Is Dangerous")
   
   table = subset(data, isdangerous == 'Yes' & (((wind_dir >= 110) & (wind_dir <= 150)) | ((wind_dir >= 290) & (wind_dir <= 330))))
   
@@ -384,7 +397,8 @@ analysis3 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_precip, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
+    geom_line()  +
+    labs(x = "Date", y = "Average Precipitation", color = "Origin")
   
   # mean_precip = mean(data$precip)
   # median_precip = median(data$precip)
@@ -398,7 +412,8 @@ analysis3 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_precip), colour="red") +
     geom_vline(aes(xintercept = median_precip), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))  +
+    labs(x = "Precipitation", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -410,18 +425,18 @@ analysis3 = function(data, season, origin) {
                # sd value
                round(sd_precip, 2),
                # overall min value and date
-               min(average_daily_precip$AverageValue),
+               paste(min(average_daily_precip$AverageValue), "On", average_daily_precip$Date[which.min(average_daily_precip$AverageValue)]),
                # overall max value and date
-               max(average_daily_precip$AverageValue),
+               paste(max(average_daily_precip$AverageValue), "On", average_daily_precip$Date[which.max(average_daily_precip$AverageValue)]),
                # jfk min value and date
-               round(min(original_data$precip[original_data$origin == "JFK"]), 2),
+               paste(round(min(original_data$precip[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$precip[original_data$origin == "JFK"])]),
                # jfk max value and date
-               round(max(original_data$precip[original_data$origin == "JFK"]), 2),
+               paste(round(max(original_data$precip[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$precip[original_data$origin == "JFK"])]),
                # lga min value and date
-               round(min(original_data$precip[original_data$origin == "LGA"]), 2),
+               paste(round(min(original_data$precip[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$precip[original_data$origin == "LGA"])]),
                # lga max value and date
-               round(max(original_data$precip[original_data$origin == "LGA"]), 2)
-  ))
+               paste(round(max(original_data$precip[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$precip[original_data$origin == "LGA"])])
+               ))
 }
 
 # Analysis 3.1
@@ -431,28 +446,34 @@ analysis3.1 = function(data, origin) {
   data$temp = farenheitToCelcius(data$temp)
   
   plot1 = ggplot(data[data$precip != 0,], aes(temp, precip, color = origin)) +
-    geom_jitter()
+    geom_jitter()  +
+    labs(x = "Temperature", y = "Precipitation", color = "Origin")
   
   data = transform(data, "rain_snow"= ifelse((temp < 0 & precip > 0), "Snow", ifelse(temp > 0 & precip > 0, "Rain", "Normal")))
 
   plot1.1 = ggplot(data, aes(new_time_hour, precip, color = rain_snow)) +
-    geom_jitter()
+    geom_jitter() +
+    labs(x = "Date", y = "Precipitation", color = "Origin")
   
   plot1.2 = ggplot(data[data$month < 4,], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
-    facet_wrap(~month, scales = "free", ncol = 1, dir = "v")
+    facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
+    labs(x = "Date", y = "Precipitation", color = "Origin")
   
   plot1.3 = ggplot(data[(data$month > 3) & (data$month < 7),], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
-    facet_wrap(~month, scales = "free", ncol = 1, dir = "v")
+    facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
+    labs(x = "Date", y = "Precipitation", color = "Origin")
   
   plot1.4 = ggplot(data[(data$month > 6) & (data$month < 10),], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
-    facet_wrap(~month, scales = "free", ncol = 1, dir = "v")
+    facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
+    labs(x = "Date", y = "Precipitation", color = "Origin")
   
   plot1.5 = ggplot(data[data$month > 9,], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
-    facet_wrap(~month, scales = "free", ncol = 1, dir = "v")
+    facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
+    labs(x = "Date", y = "Precipitation", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -470,7 +491,8 @@ analysis3.2 = function(data, origin) {
   plot1 = ggplot(data, aes(wind_dir, precip, color=origin)) +
     geom_jitter() + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 18)) + 
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    labs(x = "Wind Direction", y = "Precipitation", color = "Origin")
   
   return (list(plot1))
 }
@@ -487,11 +509,8 @@ analysis4 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_visib, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
-  
-  # mean_precip = mean(data$precip)
-  # median_precip = median(data$precip)
-  # sd_precip = sd(data$precip)
+    geom_line() +
+    labs(x = "Date", y = "Average Visibility", color = "Origin")
   
   mean_visib = mean(data$visib[data$visib < 10])
   median_visib = median(data$visib[data$visib < 10])
@@ -501,7 +520,8 @@ analysis4 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_visib), colour="red") +
     geom_vline(aes(xintercept = median_visib), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+    labs(x = "Visibility", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -513,18 +533,18 @@ analysis4 = function(data, season, origin) {
                # sd value
                round(sd_visib, 2),
                # overall min value and date
-               min(average_daily_visib$AverageValue),
+               paste(min(average_daily_visib$AverageValue), "On", average_daily_visib$Date[which.min(average_daily_visib$AverageValue)]),
                # overall max value and date
-               max(average_daily_visib$AverageValue),
+               paste(max(average_daily_visib$AverageValue), "On", average_daily_visib$Date[which.max(average_daily_visib$AverageValue)]),
                # jfk min value and date
-               round(min(original_data$visib[original_data$origin == "JFK"]), 2),
+               paste(round(min(original_data$visib[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$visib[original_data$origin == "JFK"])]),
                # jfk max value and date
-               round(max(original_data$visib[original_data$origin == "JFK"]), 2),
+               paste(round(max(original_data$visib[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$visib[original_data$origin == "JFK"])]),
                # lga min value and date
-               round(min(original_data$visib[original_data$origin == "LGA"]), 2),
+               paste(round(min(original_data$visib[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$visib[original_data$origin == "LGA"])]),
                # lga max value and date
-               round(max(original_data$visib[original_data$origin == "LGA"]), 2)
-  ))
+               paste(round(max(original_data$visib[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$visib[original_data$origin == "LGA"])])
+               ))
 }
 
 # Analysis 4.1
@@ -535,7 +555,8 @@ analysis4.1 = function(data, origin) {
   plot1 = ggplot(data, aes(hour, visib, color=origin)) + 
     geom_jitter(width = 0.5, height = 0.5) +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 24)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    labs(x = "Hour", y = "Visibility", color = "Origin")
   
   print(plot1)
   return (list(plot1))
@@ -553,7 +574,8 @@ analysis4.2 = function(data, origin) {
     geom_vline(aes(xintercept = median_visib), colour="red") +
     geom_hline(aes(yintercept = median_precip), colour="blue") + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    ylim(0, 1)
+    ylim(0, 1) +
+    labs(x = "Precipitation", y = "Visibility", color = "Origin")
   
   median_filtered_visib = mean(data$visib[data$visib < 10])
   median_filtered_precip = mean(data$precip[data$precip > 0])
@@ -563,9 +585,8 @@ analysis4.2 = function(data, origin) {
     geom_vline(aes(xintercept = median_filtered_visib), colour="red") +
     geom_hline(aes(yintercept = median_filtered_precip), colour="blue") + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    ylim(0, 1)
-  
-  View(data)
+    ylim(0, 1) +
+    labs(x = "Precipitation", y = "Visibility", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -581,6 +602,7 @@ analysis5 = function(data, season, origin) {
   data = filterSeason(data, season)
   
   original_data = data
+  original_data$dewp = farenheitToCelcius(original_data$dewp)
   
   data = filterOrigin(data, origin)
   
@@ -589,7 +611,8 @@ analysis5 = function(data, season, origin) {
 
   plot1 = ggplot(average_daily_dewp, aes(Date, AverageValue, color=Origin)) + 
     geom_point() + 
-    geom_line()
+    geom_line() +
+    labs(x = "Date", y = "Average Dewpoint", color = "Origin")
   
   data$dewp = farenheitToCelcius(data$dewp)
   mean_dewp = mean(data$dewp)
@@ -600,7 +623,8 @@ analysis5 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_dewp), colour="red") +
     geom_vline(aes(xintercept = median_dewp), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+    labs(x = "Dewpoint", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -612,18 +636,18 @@ analysis5 = function(data, season, origin) {
                # sd value
                round(sd_dewp, 2),
                # overall min value and date
-               min(average_daily_dewp$AverageValue),
+               paste(min(average_daily_dewp$AverageValue), "On", average_daily_dewp$Date[which.min(average_daily_dewp$AverageValue)]),
                # overall max value and date
-               max(average_daily_dewp$AverageValue),
+               paste(max(average_daily_dewp$AverageValue), "On", average_daily_dewp$Date[which.max(average_daily_dewp$AverageValue)]),
                # jfk min value and date
-               farenheitToCelcius(min(original_data$dewp[original_data$origin == "JFK"])),
+               paste(round(min(original_data$dewp[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$dewp[original_data$origin == "JFK"])]),
                # jfk max value and date
-               farenheitToCelcius(max(original_data$dewp[original_data$origin == "JFK"])),
+               paste(round(max(original_data$dewp[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$dewp[original_data$origin == "JFK"])]),
                # lga min value and date
-               farenheitToCelcius(min(original_data$dewp[original_data$origin == "LGA"])),
+               paste(round(min(original_data$dewp[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$dewp[original_data$origin == "LGA"])]),
                # lga max value and date
-               farenheitToCelcius(max(original_data$dewp[original_data$origin == "LGA"]))
-  ))
+               paste(round(max(original_data$dewp[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$dewp[original_data$origin == "LGA"])])
+               ))
 }
 
 # Analysis 5.1
@@ -647,7 +671,8 @@ analysis5.1 = function(data, origin) {
       geom_vline(aes(xintercept = mean_dewp), colour="red") +
       geom_vline(aes(xintercept = median_dewp), colour="blue", linetype="dashed") +
       geom_vline(aes(xintercept = mean_temp), colour="red") +
-      geom_vline(aes(xintercept = median_temp), colour="blue", linetype="dashed")
+      geom_vline(aes(xintercept = median_temp), colour="blue", linetype="dashed") +
+    labs(x = "Temperature", y = "Precipitation", color = "Variable")
   
   data = transform(data, "tempDewpDiff"= data$temp - data$dewp)
   average_temp_dewp = calculateAverageAgainstTime(data, data$tempDewpDiff)
@@ -657,7 +682,8 @@ analysis5.1 = function(data, origin) {
   plot1.1 = ggplot(average_temp_dewp, aes(Date, AverageValue, color=Origin)) +
     geom_point() +
     geom_line() + 
-    geom_hline(aes(yintercept = mean_temp_dewp_diff), colour="red")
+    geom_hline(aes(yintercept = mean_temp_dewp_diff), colour="red") +
+    labs(x = "Date", y = "Average Temperature and Dewpoint Difference", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -685,7 +711,8 @@ analysis6 = function(data, season, origin) {
   
   plot1 = ggplot(average_daily_humid, aes(Date, AverageValue, color=Origin)) +
     geom_point() +
-    geom_line()
+    geom_line() +
+    labs(x = "Date", y = "Average Humidity", color = "Origin")
   
   mean_humid = mean(data$humid)
   median_humid = median(data$humid)
@@ -695,7 +722,8 @@ analysis6 = function(data, season, origin) {
     geom_histogram() + 
     geom_vline(aes(xintercept = mean_humid), colour="red") +
     geom_vline(aes(xintercept = median_humid), colour="blue", linetype="dashed") + 
-    scale_x_continuous(breaks = scales::pretty_breaks(n = 20))
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 20)) +
+    labs(x = "Humidity", y = "Frequency", color = "Origin")
   
   print(plot1)
   return (list(plot1,
@@ -707,18 +735,18 @@ analysis6 = function(data, season, origin) {
                # sd value
                round(sd_humid, 2),
                # overall min value and date
-               min(average_daily_humid$AverageValue),
+               paste(min(average_daily_humid$AverageValue), "On", average_daily_humid$Date[which.min(average_daily_humid$AverageValue)]),
                # overall max value and date
-               max(average_daily_humid$AverageValue),
+               paste(max(average_daily_humid$AverageValue), "On", average_daily_humid$Date[which.max(average_daily_humid$AverageValue)]),
                # jfk min value and date
-               round(min(original_data$humid[original_data$origin == "JFK"]), 2),
+               paste(round(min(original_data$humid[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.min(original_data$humid[original_data$origin == "JFK"])]),
                # jfk max value and date
-               round(max(original_data$humid[original_data$origin == "JFK"]), 2),
+               paste(round(max(original_data$humid[original_data$origin == "JFK"]), 2), "On", original_data$new_time[which.max(original_data$humid[original_data$origin == "JFK"])]),
                # lga min value and date
-               round(min(original_data$humid[original_data$origin == "LGA"]), 2),
+               paste(round(min(original_data$humid[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.min(original_data$humid[original_data$origin == "LGA"])]),
                # lga max value and date
-               round(max(original_data$humid[original_data$origin == "LGA"]), 2)
-  ))
+               paste(round(max(original_data$humid[original_data$origin == "LGA"]), 2), "On", original_data$new_time[which.max(original_data$humid[original_data$origin == "LGA"])])
+               ))
 }
 
 # Analysis 6.1
@@ -727,7 +755,8 @@ analysis6.1 = function(data) {
   data = transform(data, "frosting" = ifelse((humid == 100) & (temp < 0), "Yes", "No"))
   
   plot1 = ggplot(data, aes(new_time, temp, color=frosting)) +
-    geom_jitter()
+    geom_jitter() +
+    labs(x = "Date", y = "Temperature", color = "Frosting")
   
   return (list(plot1))
 }
@@ -823,7 +852,7 @@ main = function() {
                         )
                ),
       
-               h3("Temperature (\u00B0C) and Wind Direction (\u00B0)"),
+               h3("Temperature (\u00B0C) against Wind Direction (\u00B0)"),
                plotOutput("diagram1.1"),
                
                fluidRow(
@@ -873,30 +902,30 @@ main = function() {
                
                h4("Overall Wind Speed:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_7"))
                  ),
                ),
                
                h4("JFK Wind Speed:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_9"))
                  ),
                ),
                
                h4("LGA Wind Speed:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2_11"))
                  ),
                ),
@@ -942,36 +971,36 @@ main = function() {
                
                h4("Overall Wind Gusts:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_7"))
                  ),
                ),
                
                h4("JFK Wind Gusts:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_9"))
                  ),
                ),
                
                h4("LGA Wind Gusts:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text2.1_11"))
                  ),
                ),
       ),
       tabPanel(title = "Analysis 2.2",
-               h3("Wind Direction Count (mph)"),
+               h3("Wind Direction (\u00B0)"),
                plotOutput("diagram2.2"),
                
                h4("JFK Wind Direction Summary:"),
@@ -1060,30 +1089,30 @@ main = function() {
                
                h4("Overall Precipitation:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_7"))
                  ),
                ),
                
                h4("JFK Precipitation:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_9"))
                  ),
                ),
                
                h4("LGA Precipitation:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text3_11"))
                  ),
                ),
@@ -1173,30 +1202,30 @@ main = function() {
                
                h4("Overall Visibility:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_7"))
                  ),
                ),
                
                h4("JFK Visibility:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_9"))
                  ),
                ),
                
                h4("LGA Visibility:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text4_11"))
                  ),
                ),
@@ -1285,30 +1314,30 @@ main = function() {
                
                h4("Overall Dewpoint:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_7"))
                  ),
                ),
                
                h4("JFK Dewpoint:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_9"))
                  ),
                ),
                
                h4("LGA Dewpoint:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text5_11"))
                  ),
                ),
@@ -1361,7 +1390,7 @@ main = function() {
                h3("Relative Humidity against Time"),
                plotOutput("diagram6"),
                
-               h3("Mean and Median of Dewpoint"),
+               h3("Mean and Median of Relative Humidity"),
                
                fluidRow(
                  column(4,
@@ -1379,30 +1408,30 @@ main = function() {
                
                h4("Overall Relative Humidity:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_6"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_7"))
                  ),
                ),
                
                h4("JFK Relative Humidity:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_8"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_9"))
                  ),
                ),
                
                h4("LGA Relative Humidity:"),
                fluidRow(
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_10"))
                  ),
-                 column(3,
+                 column(6,
                         h5(textOutput("text6_11"))
                  ),
                ),
