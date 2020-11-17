@@ -13,7 +13,7 @@ Wind
 
 * [x] Analysis 2.1 - What is the mean, min and max wind gust at both airports for each season
 
-* [x] Analysis 2.2 - What is the mean, min and max wind direction at both airports for each season
+* [x] Analysis 2.2 - What is the mean, min and max wind direction at both airports for each season #removed as found unsuitable
 
 * [x] Analysis 2.3 - Does wind gust increments with wind speed (Relationship between wind gust and wind speed)?
 
