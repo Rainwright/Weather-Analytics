@@ -22,8 +22,8 @@ library("ggpmisc")
 # load data from csv file
 loadData = function() {
   # import file, path may vary from pc to pc
-  # data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Weather Analytics/weatherdata.csv", header=TRUE, sep=",")
-  data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
+  data = read.csv(file="D:/Downloads (HDD)/APU Courses/Degree Year 2/Sem 1/PFDA/Assignment/Weather Analytics/weatherdata.csv", header=TRUE, sep=",")
+  # data = read.csv(file="E:/Documents/R Projects/Weather-Analytics/weatherdata.csv", header=TRUE, sep=",")
   options(max.print=1000000)
   print(colnames(data))
   return (data)
@@ -152,7 +152,7 @@ analysis1 = function(data, season, origin) {
               ))
 }
 
-# Analysis 1.1
+# Analysis 2 in documentation
 analysis1.1 = function(data, origin) {
   print(sort(unique(data$wind_dir)))
   data = filterOrigin(data, origin)
@@ -162,7 +162,7 @@ analysis1.1 = function(data, origin) {
   plot1 = ggplot(data, aes(wind_dir, temp, color=origin)) + 
     geom_jitter() + 
     scale_x_continuous(breaks = scales::pretty_breaks(n = 36)) +
-    labs(x = "Temperature", y = "Wind Direction", color = "Origin")
+    labs(x = "Wind Direction", y = "Temperature", color = "Origin")
   
   temp_counter = 0
   angle_column = c()
@@ -183,7 +183,7 @@ analysis1.1 = function(data, origin) {
                table))
 }
 
-# Analysis 2
+# Analysis 3 in documentation
 analysis2 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -233,7 +233,7 @@ analysis2 = function(data, season, origin) {
                ))
 }
 
-# Analysis 2.1
+# Analysis 4 in documentation
 analysis2.1 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -283,24 +283,10 @@ analysis2.1 = function(data, season, origin) {
                ))
 }
 
-# Analysis 2.2
-analysis2.2 = function(data) {
-  # plot1 = ggplot(data, aes(x = wind_dir, fill=origin)) + 
-  #   geom_histogram()
-  # 
-  plot1 = ggplot(data, aes(y = wind_dir, x = 1, fill=origin)) + 
-    geom_boxplot() + 
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 18)) +
-    labs(y = "Wind Direction", fill = "Origin")
-  
-  print(plot1)
-  return(list(plot1,
-              summary(data$wind_dir[data$origin == "JFK"]),
-              summary(data$wind_dir[data$origin == "LGA"])
-              ))
-}
+# Analysis 2.2 was deprecated
 
-# Analysis 2.3
+
+# Analysis 5 in documentation
 analysis2.3 = function(data, origin) {
   data = filterOrigin(data, origin)
   
@@ -339,7 +325,7 @@ analysis2.3 = function(data, origin) {
                plot1.1))
 }
 
-# Analysis 2.4
+# Analysis 6 in documentation
 analysis2.4 = function(data) {
   # print(sort(unique(data$wind_speed)))
   # print(sort(unique(data$wind_dir)))
@@ -350,13 +336,14 @@ analysis2.4 = function(data) {
   # 223.9   # 225.3
   # 313.9   # 315.3
   
-  data = transform(data, "isdangerous" = ifelse((origin == 'JFK') & (wind_speed >= 30), "Yes", "No"))
-  data = transform(data, "isdangerous" = ifelse((origin == 'LGA') & (wind_speed >= 30), "Yes", "No"))
+  data = transform(data, "isdangerous" = ifelse(
+    (wind_speed >= 30) &
+      (((wind_dir >= 20 & wind_dir <= 60) | (wind_dir >= 200 & wind_dir <= 240)) |
+         ((wind_dir >= 110 & wind_dir <= 150) | (wind_dir >= 290 & wind_dir <= 330)))
+    , "Yes", "No"))
   
-  data = data[!is.na(data$isdangerous), ]
-
   plot1 = ggplot(data[(data$origin == 'JFK') & (((data$wind_dir >= 20) & (data$wind_dir <= 60)) | ((data$wind_dir >= 200) & (data$wind_dir <= 240))),], aes(new_time, wind_speed, color=isdangerous)) +
-    geom_jitter() + 
+    geom_jitter() +
     scale_colour_discrete(na.translate = F) +
     labs(x = "Date", y = "Wind Speed", color = "Is Dangerous")
   
@@ -385,7 +372,7 @@ analysis2.4 = function(data) {
                table))
 }
  
-# Analysis 3
+# Analysis 7 in documentation
 analysis3 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -439,7 +426,7 @@ analysis3 = function(data, season, origin) {
                ))
 }
 
-# Analysis 3.1
+# Analysis 8 in documentation
 analysis3.1 = function(data, origin) {
   data = filterOrigin(data, origin)
   
@@ -453,27 +440,27 @@ analysis3.1 = function(data, origin) {
 
   plot1.1 = ggplot(data, aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
-    labs(x = "Date", y = "Precipitation", color = "Origin")
+    labs(x = "Date", y = "Precipitation", color = "Condition")
   
   plot1.2 = ggplot(data[data$month < 4,], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
     facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
-    labs(x = "Date", y = "Precipitation", color = "Origin")
+    labs(x = "Date", y = "Precipitation", color = "Condition")
   
   plot1.3 = ggplot(data[(data$month > 3) & (data$month < 7),], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
     facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
-    labs(x = "Date", y = "Precipitation", color = "Origin")
+    labs(x = "Date", y = "Precipitation", color = "Condition")
   
   plot1.4 = ggplot(data[(data$month > 6) & (data$month < 10),], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
     facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
-    labs(x = "Date", y = "Precipitation", color = "Origin")
+    labs(x = "Date", y = "Precipitation", color = "Condition")
   
   plot1.5 = ggplot(data[data$month > 9,], aes(new_time_hour, precip, color = rain_snow)) +
     geom_jitter() +
     facet_wrap(~month, scales = "free", ncol = 1, dir = "v") +
-    labs(x = "Date", y = "Precipitation", color = "Origin")
+    labs(x = "Date", y = "Precipitation", color = "Condition")
   
   print(plot1)
   return (list(plot1,
@@ -484,7 +471,7 @@ analysis3.1 = function(data, origin) {
                plot1.5))
 }
 
-# Analysis 3,2
+# Analysis 9 in documentation
 analysis3.2 = function(data, origin) {
   data = filterOrigin(data, origin)
   
@@ -497,7 +484,7 @@ analysis3.2 = function(data, origin) {
   return (list(plot1))
 }
 
-# Analysis 4
+# Analysis 10 in documentation
 analysis4 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -547,7 +534,7 @@ analysis4 = function(data, season, origin) {
                ))
 }
 
-# Analysis 4.1
+# Analysis 11 in documentation
 analysis4.1 = function(data, origin) {
   print(sort(unique(data$visib)))
   data = filterOrigin(data, origin)
@@ -562,12 +549,12 @@ analysis4.1 = function(data, origin) {
   return (list(plot1))
 }
 
-# Analysis 4.2
+# Analysis 12 in documentation
 analysis4.2 = function(data, origin) {
   data = filterOrigin(data, origin)
   
-  median_visib = mean(data$visib)
-  median_precip = mean(data$precip)
+  median_visib = median(data$visib)
+  median_precip = median(data$precip)
   
   plot1 = ggplot(data, aes(visib, precip, color=origin)) +
     geom_jitter(width = 0.5, height = 0.5) + 
@@ -577,8 +564,8 @@ analysis4.2 = function(data, origin) {
     ylim(0, 1) +
     labs(x = "Precipitation", y = "Visibility", color = "Origin")
   
-  median_filtered_visib = mean(data$visib[data$visib < 10])
-  median_filtered_precip = mean(data$precip[data$precip > 0])
+  median_filtered_visib = median(data$visib[data$visib < 10])
+  median_filtered_precip = median(data$precip[data$precip > 0])
   
   plot1.1 = ggplot(data[(data$visib < 10) & (data$precip > 0),], aes(visib, precip, color=origin)) +
     geom_jitter(width = 0.5, height = 0.5) + 
@@ -597,7 +584,7 @@ analysis4.2 = function(data, origin) {
                round(median_filtered_precip, 5)))
 }
 
-# Analysis 5
+# Analysis 13 in documentation
 analysis5 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -650,7 +637,7 @@ analysis5 = function(data, season, origin) {
                ))
 }
 
-# Analysis 5.1
+# Analysis 14 in documentation
 analysis5.1 = function(data, origin) {
   data = filterOrigin(data, origin)
   data$temp = farenheitToCelcius(data$temp)
@@ -695,7 +682,7 @@ analysis5.1 = function(data, origin) {
                round(mean_temp_dewp_diff, 2)))
 }
 
-# Analysis 6
+# Analysis 15 in documentation
 analysis6 = function(data, season, origin) {
   data = filterSeason(data, season)
   
@@ -749,7 +736,7 @@ analysis6 = function(data, season, origin) {
                ))
 }
 
-# Analysis 6.1
+# Analysis 16 in documentation
 analysis6.1 = function(data) {
   data$temp = farenheitToCelcius(data$temp)
   data = transform(data, "frosting" = ifelse((humid == 100) & (temp < 0), "Yes", "No"))
@@ -840,7 +827,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 1.1",
+      tabPanel(title = "Analysis 2",
                fluidRow(
                  column(4,
                         selectInput("origin_1.1", h3("Select Origin"),
@@ -861,7 +848,7 @@ main = function() {
                  )
                ),
       ),
-      tabPanel(title = "Analysis 2",
+      tabPanel(title = "Analysis 3",
                fluidRow(
                  column(4,
                         selectInput("season_2", h3("Select Season"),
@@ -930,7 +917,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 2.1",
+      tabPanel(title = "Analysis 4",
                fluidRow(
                  column(4,
                         selectInput("season_2.1", h3("Select Season"),
@@ -999,16 +986,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 2.2",
-               h3("Wind Direction (\u00B0)"),
-               plotOutput("diagram2.2"),
-               
-               h4("JFK Wind Direction Summary:"),
-               h5(textOutput("text2.2_1")),
-               h4("LGA Wind Direction Summary:"),
-               h5(textOutput("text2.2_2"))
-      ),
-      tabPanel(title = "Analysis 2.3",
+      tabPanel(title = "Analysis 5",
                fluidRow(
                  column(4,
                         selectInput("origin_2.3", h3("Select Origin"),
@@ -1025,7 +1003,7 @@ main = function() {
                h4("After Replacing NA Values"),
                plotOutput("diagram2.3_1")
       ),
-      tabPanel(title = "Analysis 2.4",
+      tabPanel(title = "Analysis 6",
                h3("Wind Speed Against Time in JFK"),
                h4("Wind Direction [20-60\u00B0, 200-240\u00B0]"),
                plotOutput("diagram2.4"),
@@ -1048,7 +1026,7 @@ main = function() {
                  )
                ),
       ),
-      tabPanel(title = "Analysis 3",
+      tabPanel(title = "Analysis 7",
                fluidRow(
                  column(4,
                         selectInput("season_3", h3("Select Season"),
@@ -1117,7 +1095,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 3.1",
+      tabPanel(title = "Analysis 8",
                fluidRow(
                  column(4,
                         selectInput("season_3.1", h3("Select Season"),
@@ -1148,7 +1126,7 @@ main = function() {
                plotOutput("diagram3.1_4"),
                plotOutput("diagram3.1_5")
       ),
-      tabPanel(title = "Analysis 3.2",
+      tabPanel(title = "Analysis 9",
                fluidRow(
                  column(4,
                         selectInput("origin_3.2", h3("Select Origin"),
@@ -1161,7 +1139,7 @@ main = function() {
                h3("Precipitation Against Wind Direction (\u00B0)"),
                plotOutput("diagram3.2")
       ),
-      tabPanel(title = "Analysis 4",
+      tabPanel(title = "Analysis 10",
                fluidRow(
                  column(4,
                         selectInput("season_4", h3("Select Season"),
@@ -1230,7 +1208,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 4.1",
+      tabPanel(title = "Analysis 11",
                fluidRow(
                  column(4,
                         selectInput("origin_4.1", h3("Select Origin"),
@@ -1243,7 +1221,7 @@ main = function() {
                h3("Visibility against Hour"),
                plotOutput("diagram4.1")
       ),
-      tabPanel(title = "Analysis 4.2",
+      tabPanel(title = "Analysis 12",
                fluidRow(
                  column(4,
                         selectInput("origin_4.2", h3("Select Origin"),
@@ -1274,7 +1252,7 @@ main = function() {
                  )
                )
       ),
-      tabPanel(title = "Analysis 5",
+      tabPanel(title = "Analysis 13",
                fluidRow(
                  column(4,
                         selectInput("season_5", h3("Select Season"),
@@ -1342,7 +1320,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 5.1",
+      tabPanel(title = "Analysis 14",
                fluidRow(
                  column(4,
                         selectInput("origin_5.1", h3("Select Origin"),
@@ -1368,7 +1346,7 @@ main = function() {
                plotOutput("diagram5.1_1"),
                h5(textOutput("text5.1_7"))
       ),
-      tabPanel(title = "Analysis 6",
+      tabPanel(title = "Analysis 15",
                fluidRow(
                  column(4,
                         selectInput("season_6", h3("Select Season"),
@@ -1436,7 +1414,7 @@ main = function() {
                  ),
                ),
       ),
-      tabPanel(title = "Analysis 6.1",
+      tabPanel(title = "Analysis 16",
                h3("Frosting against Time"),
                plotOutput("diagram6.1"),
       )
@@ -1587,19 +1565,6 @@ main = function() {
       
       output$text2.1_11 <- renderText({
         paste("Max :", current_analysis[11])
-      })
-    })
-    
-    output$diagram2.2 <- renderPlot({
-      current_analysis = analysis2.2(data)
-      current_analysis[1]
-      
-      output$text2.2_1 <- renderText({
-        paste(current_analysis[2])
-      })
-      
-      output$text2.2_2 <- renderText({
-        paste(current_analysis[3])
       })
     })
     
@@ -1767,19 +1732,19 @@ main = function() {
       })
       
       output$text4.2_3 <- renderText({
-        paste("Mean Visibility :", current_analysis[3])
+        paste("Median Visibility :", current_analysis[3])
       })
       
       output$text4.2_4 <- renderText({
-        paste("Mean Precipitation :", current_analysis[4])
+        paste("Median Precipitation :", current_analysis[4])
       })
       
       output$text4.2_5 <- renderText({
-        paste("Mean Visibility :", current_analysis[5])
+        paste("Median Visibility :", current_analysis[5])
       })
       
       output$text4.2_6 <- renderText({
-        paste("Mean Precipitation :", current_analysis[6])
+        paste("Median Precipitation :", current_analysis[6])
       })
     })
     
