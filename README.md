@@ -1,5 +1,6 @@
 # Weather-Analytics
-PFDA Assignment - Data Analysis on Hourly Weather Data
+First R Project! (PFDA Assignment)
+- Data Analysis on Hourly Weather Data
 
 Temperature
 
